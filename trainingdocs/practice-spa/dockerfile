@@ -1,0 +1,8 @@
+FROM node:12.20.1
+WORKDIR /app
+COPY package*.json ./
+ENV REACT_APP_API_HOST=http://localhost:8002
+RUN npm install
+COPY ./ ./
+EXPOSE 3000
+CMD ["npm","run","start"]
