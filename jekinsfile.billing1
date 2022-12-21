@@ -1,0 +1,43 @@
+pipeline {
+    agent any
+    triggers{
+        cron('''10 * * * *''')
+    }
+    parameters {
+        string(name: 'filename', defaultValue:'Invoicereport.csv', description: 'Name of the report file')
+        string(name: 'projectname', defaultValue:'YOUI-Production', description: 'Name of the Project')
+        string(name: 'billing_tag', defaultValue:'youi-production', description: 'tags')
+        string(name: 'region', defaultValue:'ap-northeast-1', description: 'region')
+        string(name: 'currency', defaultValue:'JPY', description: 'Currency of the Cost in the Report')
+    }
+    stages {
+        stage('Checkout'){
+            steps {
+                script {
+            checkout([$class: 'GitSCM', branches: [[name: '*/develop-invoice']], browser: [$class: 'GitLab', repoUrl: ''], extensions: [], userRemoteConfigs: [[credentialsId: 'code.qburst', url: 'https://code.qburst.com/fr-devops/qb-internal/qb-internal-support.git']]])
+                       }
+                  }
+           }
+        stage('Script Execution') {
+            steps {
+                script {
+                   dir('invoice-generator') {
+                   sh 'export PYTHONPATH=$PATH:$PYTHONPATH'
+                   sh """python3 invoice_generator.py --filename ${filename} --projectname ${projectname} --billing_tag ${billing_tag} --region ${region} --currency ${currency}"""
+                       }
+                }
+                  }
+            }                                        
+    }               
+    post {
+       success {
+           echo "Success"
+           slackSend(channel: "#jenkins-practice", message: "Notification from Jenkins: SUCCESS")
+           slackUploadFile(filePath: "${filename}", initialComment:  "YOUI Production Invoice Report")
+        }
+       failure {
+           echo "Failure"
+           slackSend(channel: "#jenkins-practice", message: "Notification from Jenkins: FAILURE")
+      }
+}
+}
