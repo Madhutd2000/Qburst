@@ -1,0 +1,13 @@
+1) Go to Kibana --> Manage your Data under Manage permissions.
+
+2) To create Roles - In Security Tab --> Roles --> Create Roles
+
+3) Provide Role name - follow the naming convention - platformname_permission
+
+4) Provide Index Privileges - Provide the Index name and the required permission and create Role.
+
+5) To create Users - In Security Tab --> Users --> Create Users
+
+6) Provide the Username, Password, Full Name and the required Role and create User.
+
+
