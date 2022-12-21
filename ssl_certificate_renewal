@@ -1,0 +1,90 @@
+Internal SSL Certifcate renewal
+
+Step 1 - Trigger the Jenkins job - https://internal.qburst.build/jenkins/view/certificate-renewal/job/renew-ssl-certificate/ by specifying the parameters.
+
+        a) Build with Parameters - specify the nginx host and the domain name and build.
+		
+		nginx_host - nginx.ap-south-1.qburst.internal
+		domain_name - admin.portal.qburst.build
+		                      (or)
+				      internal.qburst.build
+					          (or)
+					  callcenter.qburst.build
+					          (or)
+					  hibana.qburst.build
+					  
+		
+		
+The job renews the SSL certificates for the provided domains with the help of https://letsencrypt.org/ which provides free SSL certificates valid for 90 days.
+
+code-qburst.com - https://code.qburst.com/fr-devops/qb-internal/qb-internal-support/-/tree/develop/renew-certificate
+
+To login to the nginx server:
+                             - qb-internal-nginx
+                             - ssh qb-internal-bastion
+							 - ssh qbdevops@10.80.10.36      password for qbdevops - 7HHYR3gcxKgPw7FD
+							 - cd /etc/nginx/sites-available
+							 - ls
+							 admin.portal.qburst.build.conf  
+							 callcenter.qburst.build.conf  
+							 hibana.qburst.build.conf    
+							 qburst.build.conf        
+							 uiblocks.qburst.build.conf  
+							 zentrum.qburst.build.conf
+                             admin.youi.qburst.build         
+							 default                       
+							 internal.qburst.build.conf  
+							 qtalk.qburst.build.conf  
+							 youi.qburst.build
+							 - history|grep cert
+							     8  sudo certbot -n --redirect --force-renew --nginx -d qtalk.qburst.build (to run the certification renewal command manually)
+                                 13  certbot --nginx
+                                 14  sudo certbot --nginx
+                                 23  history|grep cert
+
+Known Errors:
+
+1)stderr: Another instance of Certbot is already running.
+
+PLAY RECAP *********************************************************************
+localhost                  : ok=6    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=1   
+nginx                      : ok=0    changed=0    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0 
+
+a) Kill the certbox process already running
+
+$ ps -ef | grep certb
+ root     28622 27895  0 03:57 pts/0    00:00:00 sudo certbot --nginx
+
+b) Check if there are any lock files
+
+$find / -type f -name ".certbot.lock"
+$cd /var/lib/letsencrypt
+-rw-------  1 root root    0 Dec  6 03:57 .certbot.lock
+$find / -type f -name ".certbot.lock" -exec rm {} \;
+
+Nagios Alert check:
+
+https://internal.qburst.build/nagios/
+
+credentials - 
+Internal Nagios	
+User	Password
+nagiosadmin	bullet
+
+Current status - services
+
+ssl-certificate-expiry
+Active checks of this host have been disabled - only passive checks are being accepted
+SSL-CERT-admin.portal.qburst.build
+OK	12-06-2021 07:03:23	0d 1h 57m 10s	1/3	SSL_CERT OK - x509 certificate 'admin.portal.qburst.build' from 'R3' valid until Mar 6 04:09:12 2022 GMT (expires in 89 days) 
+SSL-CERT-callcenter.qburst.build
+OK	12-06-2021 07:04:08	0d 1h 46m 26s	1/3	SSL_CERT OK - x509 certificate 'callcenter.qburst.build' from 'R3' valid until Mar 6 04:20:35 2022 GMT (expires in 89 days) 
+SSL-CERT-hibana.qburst.build
+OK	12-06-2021 07:04:49	0d 3h 15m 44s	1/3	SSL_CERT OK - x509 certificate 'hibana.qburst.build' from 'R3' valid until Mar 6 02:50:55 2022 GMT (expires in 89 days) 
+SSL-CERT-internal.qburst.build
+OK	12-06-2021 07:08:26	0d 1h 52m 7s	1/3	SSL_CERT OK - x509 certificate 'internal.qburst.build' from 'R3' valid until Mar 6 04:15:17 2022 GMT (expires in 89 days) 
+SSL-CERT-qtalk.qburst.build
+OK	12-06-2021 07:06:20	14d 3h 45m 36s	1/3
+
+
+							 
