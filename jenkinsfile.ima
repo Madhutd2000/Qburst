@@ -1,0 +1,43 @@
+pipeline {
+    
+    agent {
+        label 'wave20-java11-build'
+    }
+    
+	environment {
+		AWS_ACCOUNT = sh (script:"aws sts get-caller-identity | jq -r '.Account'", returnStdout: true).trim()
+		AWS_REGION = "ap-south-1"
+    }
+
+	stages {
+		stage('checkout'){
+            		steps {
+	              		git url: "https://code.qburst.com/qb-qa-set/qb-qa-set", branch: "develop", credentialsId: "anjurajasekharan"
+            		}
+        	}
+        	
+        	stage('build'){
+        		steps {
+        			script {
+        			    dir('cleansing-and-sensitivity/price') {
+        			    sh "mvn clean install"
+        			}
+        		   }	
+        	     }
+        	}
+        	stage('deploy'){
+        		steps {
+        			script {
+        			    dir('cleansing-and-sensitivity/price') {
+        			    branch_name = "develop"
+        			    sh "docker build -t ima/db-cleansing:ima ."
+        			    sh "set +x; eval \$(aws ecr get-login --region ${AWS_REGION} --no-include-email)"
+                                   sh "docker tag ima/db-cleansing:ima ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/catalog/db-cleansing:ima"
+                                   sh "docker push ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/catalog/db-cleansing:ima"
+                                   sh "docker rmi ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/catalog/db-cleansing:ima"
+                                      }
+        			}
+        		}
+        	}
+	}
+}
