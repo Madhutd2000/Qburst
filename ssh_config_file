@@ -1,0 +1,35 @@
+HOST frwave15-bastion
+  IdentityFile ~/Downloads/frwave15-dev-key-pair.pem
+  User lakshmi
+  Hostname 10.60.20.8
+
+HOST 10.60.*
+  User qbdevops
+  IdentityFile ~/Documents/FR/frwave15-dev-key-pair.pem
+  ProxyCommand ssh frwave15-bastion -W %h:%p
+
+HOST 10.40.*
+  User qbdevops
+  IdentityFile ~/Documents/FR/frwave15-dev-key-pair.pem
+  ProxyCommand ssh frwave15-bastion -W %h:%p
+
+HOST qb-internal-bastion
+  IdentityFile ~/Downloads/qb-internal-key-pair.pem
+  User ubuntu
+  Hostname 3.7.8.85
+
+HOST 10.80.*
+  User qbdevops
+  IdentityFile ~/Documents/FR/qb-internal-key-pair.pem
+  ProxyCommand ssh qb-internal-bastion -W %h:%p
+
+Host fdb
+HostName 15.206.166.242
+User ubuntu
+IdentityFile ~/Documents/FR/frdigest-ap-south-1-prd-maintenance.pem
+
+Host fdj
+HostName 10.20.10.152
+User ubuntu
+IdentityFile ~/Documents/FR/frdigest-ap-south-1-prd-maintenance.pem
+ProxyCommand ssh -W %h:%p fdb
