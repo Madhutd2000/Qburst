@@ -1,0 +1,30 @@
+Take db dump of ima_restore DB from DB host1: image-pf-test-db-1.cg2mjfhsubje.ap-south-1.rds.amazonaws.com (user ima_dev)
+Delete the current ima_restore DB from DB host2: image-pf-test-db-2.cg2mjfhsubje.ap-south-1.rds.amazonaws.com  (user ima_dev)
+import the new DB dump in host2: image-pf-test-db-2.cg2mjfhsubje.ap-south-1.rds.amazonaws.com  (user ima_dev)
+
+Commands-
+
+*Login to internal bastion (qb-internal-bastion - 3.7.8.85)
+
+#pg_dump -h image-pf-test-db-1.cg2mjfhsubje.ap-south-1.rds.amazonaws.com -p 5432 -U ima_dev ima > ima_db_dump.sql
+
+
+* Remove exitsing ima_restore db from host 2
+
+1. Login to host2
+
+#psql -h image-pf-test-db-1.cg2mjfhsubje.ap-south-1.rds.amazonaws.com -p 5432 -U ima_dev postgres
+
+2. Delete ima_restore DB
+#drop database ima_restore;
+
+3. Create new database (login as postgres user)
+
+#psql -h image-pf-test-db-1.cg2mjfhsubje.ap-south-1.rds.amazonaws.com -p 5432 -U postgres postgres
+
+#create database ima_restore;
+#alter database ima_restore owner to "ima-dev";
+
+5. From basetion import dump as ima_dev user
+
+#psql -h image-pf-test-db-1.cg2mjfhsubje.ap-south-1.rds.amazonaws.com -p 5432 -U ima_dev ima_restore -f ima_db_dump.sql
