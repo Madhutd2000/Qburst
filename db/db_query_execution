@@ -1,0 +1,23 @@
+Connect to bastion
+
+psql -h dev03.postgres.ap-northeast-1.test03.qburst.local -p 5432 -U bktadmin -d basket -f update_sg_min3k.sql
+
+psql -h image-pf-test-db-2.cg2mjfhsubje.ap-south-1.rds.amazonaws.com -p 5432 -U shohin shohin_dev -f shohin_dev.sql
+
+psql -h dev03.postgres.ap-northeast-1.test03.qburst.local -p 5432 -U bktadmin -d basket -f update_ID_max_amount.sql
+
+#pg_dump -h image-pf-test-db-1.cg2mjfhsubje.ap-south-1.rds.amazonaws.com -p 5432 -U shohin shohin_dev > catalog_db_dump.sql
+
+image-pf-test-db-1.cg2mjfhsubje.ap-south-1.rds.amazonaws.com
+d 
+ psql -h dev.catalog.postgres.ap-northeast-1.qburst.local -p 5433 -U shohin -d shohin_dev
+ 
+ psql -h dev.postgres.ap-northeast-1.qburst.local -p 5432 -U priceadmin -d price -f price_table.sql
+  psql -h dev.catalog.postgres.ap-northeast-1.qburst.local -p 5432 -U ec_admin -d admin_db
+  
+  psql -h dev.postgres.ap-northeast-1.qburst.local -p 5432 -U priceadmin -d price -w m82aFgS2fzYuUakG
+  
+  dev03.postgres.ap-northeast-1.test03.qburst.local
+  
+  psql -h dev.postgres.ap-northeast-1.qburst.local -p 5432 -U priceadmin -d price -f insert_m_general_purpose_novelty.sql
+ 
