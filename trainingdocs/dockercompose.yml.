@@ -1,0 +1,36 @@
+version: '3'
+services:
+  practice-api:
+    container_name: practice-api
+    build:
+      context: /home/lakshmi/25-10-2021/docker-compose/practice-api
+      dockerfile: Dockerfile
+    ports:
+      - 4001:4001
+    depends_on:
+      - db
+  practice-spa:
+    container_name: practice-spa
+    build:
+      context: /home/lakshmi/25-10-2021/docker-compose/practice-spa
+      dockerfile: Dockerfile
+    ports:
+      - 8002:3000
+  db:
+    image: postgres
+    container_name: test
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: test
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+      POSTGRES_NAME: test
+      POSTGRES_USER: test
+    volumes:
+      - pgdata:/var/lib/postgresql
+    ports:
+      - "5432:5432"
+volumes:
+  pgdata:
+  
+    
