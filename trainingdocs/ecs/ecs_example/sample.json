@@ -1,0 +1,17 @@
+[
+    {
+        "name": "sample-spa",
+        "image": "615128559155.dkr.ecr.us-east-2.amazonaws.com/lakshmiprabha:spa",
+        "memory": 256,
+        "cpu": 128,
+        "essential": true,
+        "portMappings":[
+            {
+                "containerPort": 80,
+                "hostPort": 80,
+                "protocol":"tcp"
+            }
+        ]
+
+    }
+]
