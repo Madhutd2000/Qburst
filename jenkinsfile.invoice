@@ -1,0 +1,87 @@
+def outputfile
+def cal = Calendar.instance;
+def currentYear = cal.get(Calendar.YEAR);
+def currentMonth = cal.get(Calendar.MONTH);
+ 
+// set the instance to the start of the previous month
+if ( currentMonth == 0 ) {
+cal.set(currentYear-1, 11, 1);
+} else {
+cal.set(currentYear, (currentMonth-1), 1);
+}
+ 
+// extract the date, and format to a string
+Date previousMonth = cal.time;
+String month = previousMonth.format('MMM');
+String year = previousMonth.format('yyyy');
+
+def slackNotifySuccess(def msg,  outputfile) {
+    wrap([$class: 'BuildUser']) {
+        slackSend(color: '#00FF00', message: "${msg}\nTRIGGERED BY: ${BUILD_USER}\n")
+        slackUploadFile(filePath: "${outputfile}")
+    }
+}
+def slackNotifyFailed(def msg) {
+    wrap([$class: 'BuildUser']) {
+        slackSend(color: '#FF0000', message: "${msg}\nTRIGGERED BY: ${BUILD_USER}")
+    }
+}
+def slackNotifySuccessNoreport(def msg) {
+    wrap([$class: 'BuildUser']) {
+        slackSend(color: '#00FF00', message: "${msg}\nTRIGGERED BY: ${BUILD_USER}")
+    }
+}
+
+pipeline {
+    agent any
+    triggers{
+        cron('''0 8 1 * *''')
+    }
+    parameters {
+        string(name: 'filename', defaultValue:"AWS-Invoice-${projectname}-${year}-${month}.csv", description: 'Name of the report file')
+        string(name: 'projectname', defaultValue:"${projectname}", description: 'Name of the Project')
+        string(name: 'billing_tag', defaultValue:"${billing_tag}", description: 'tags')
+        string(name: 'region', defaultValue:"${region}", description: 'region')
+        string(name: 'currency', defaultValue:"${currency}", description: 'Currency of the Cost in the Report')
+    }
+    stages {
+        stage('Checkout'){
+            steps {
+                script {
+                    cleanWs()
+                    checkout([$class: 'GitSCM', branches: [[name: '*/develop']], browser: [$class: 'GitLab', repoUrl: ''], extensions: [], userRemoteConfigs: [[credentialsId: 'lak_gitlab_token', url: 'https://code.qburst.com/fr-devops/qb-internal/qb-internal-support.git']]])
+                }
+            }
+        }
+        stage('Script Execution') {
+            steps {
+                script {
+                   dir('invoice-generator') {
+                        sh """pip install boto3"""
+                        sh """pip install --user currencyconverter"""
+                        sh 'export PYTHONPATH=$PATH:$PYTHONPATH'
+                        sh """python invoice_generator.py --filename ${filename} --projectname ${projectname} --billing_tag ${billing_tag} --region ${region} --currency ${currency}"""
+                        MY_FILE = fileExists "${filename}"
+                        if (fileExists("${filename}"))
+                            {
+                            message="AWS-Invoice-${projectname}-${year}-${month}"
+                            echo "${message}"
+                            slackNotifySuccess(message,filename)   
+                            }
+                        else
+                            {
+                            message="Report not generated. Please check Jenkins logs for more information"
+                            echo "${message}"
+                            slackNotifySuccessNoreport(message,filename)
+                            }
+                        }
+                }
+            }
+        }
+    }  
+    post {
+        failure {
+            slackNotifyFailed("Error fetching the ${filename}. Please check the Jenkins logs for more information")
+        }
+    }                                      
+}     
