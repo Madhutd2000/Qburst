@@ -1,0 +1,31 @@
+pipeline {
+    agent any
+    stages {
+        stage('Docker Build') {
+            steps {
+                script {
+                    sh "aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 615128559155.dkr.ecr.us-east-2.amazonaws.com"
+                    sh "docker build -t jenkins-practice-spa ."
+                }
+            }
+        }
+        stage('Push to ECR') {
+            steps {
+                script {
+                    sh "docker tag jenkins-practice-spa:latest 615128559155.dkr.ecr.us-east-2.amazonaws.com/lakshmiprabha:jenkins-practice-spa"
+                    sh "docker push 615128559155.dkr.ecr.us-east-2.amazonaws.com/lakshmiprabha:jenkins-practice-spa"
+                }
+            }
+        }
+    }
+    post {
+        success {
+            echo "Success"
+            slackSend(channel: "#jenkins-practice", message: "Notification from Jenkins: JOB COMPLETED SUCCESS")
+        }
+        failure {
+            echo "Failure"
+            slackSend(channel: "#jenkins-practice", message: "Notification from Jenkins: FAILURE")
+        }
+    }
+}
