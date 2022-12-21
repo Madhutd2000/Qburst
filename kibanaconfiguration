@@ -1,0 +1,24 @@
+Log configuration in Kibana
+
+1) login to Kibana
+
+	URL - https://internal.qburst.build/kibana/app/home#/
+	Username - elastic 
+    Password - zNg6UnGUEzQ79p4Nb8
+			  
+2) Go to Menu --> Management --> Stack Management --> Kibana --> Index Patterns --> Create Index Pattern
+
+3) Provide the index pattern name which matches the source.
+
+4) Go to configure settings and set the time field and create index pattern.
+
+4) Go to Menu --> Kibana --> Discover
+
+5) In the left of the page there will be an option to select the required index pattern. Once selected, the logs will be displayed.
+
+
+
+fluentd-catalog-masking*
+
+
+
